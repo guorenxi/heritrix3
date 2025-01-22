@@ -1,8 +1,8 @@
 /*
  *  This file is part of the Heritrix web crawler (crawler.archive.org).
  *
- *  Licensed to the Internet Archive (IA) by one or more individual 
- *  contributors. 
+ *  Licensed to the Internet Archive (IA) by one or more individual
+ *  contributors.
  *
  *  The IA licenses this file to You under the Apache License, Version 2.0
  *  (the "License"); you may not use this file except in compliance with
@@ -16,20 +16,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.archive.modules.recrawl.hbase;
-
-
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.archive.modules.CrawlURI;
+package org.archive.modules.net;
 
 /**
- * @author kenji
+ * Policy to obey robots.txt but ignore meta nofollow.
  */
-public interface RecrawlDataSchema {
-    public String getColumnFamily();
-    public Put createPut(CrawlURI uri);
-    public void load(Result result, CrawlURI curi);
-    // TODO: drop this method by revising createPut(CrawlURI) method.
-    public byte[] rowKeyForURI(CrawlURI curi);
+public class RobotsTxtOnlyPolicy extends ObeyRobotsPolicy {
+    public static RobotsPolicy INSTANCE = new RobotsTxtOnlyPolicy();
+
+    @Override
+    public boolean obeyMetaRobotsNofollow() {
+        return false;
+    }
 }

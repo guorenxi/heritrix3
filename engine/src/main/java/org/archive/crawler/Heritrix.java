@@ -128,6 +128,10 @@ public class Heritrix {
                 "\"password\" (which leaves username as the default 'admin'), " +
                 "\"username:password\", or \"@filename\" for a file that " +
                 "includes the single line \"username:password\". ");
+        options.addOption("c", "checkpoint", true,
+                "Recovers from the given checkpoint. May only be used with the " +
+                "--run-job option. The special value 'latest' will recover the " +
+                "last checkpoint or if none exist will launch a new crawl.");
         options.addOption("j", "jobs-dir", true, "The jobs directory.  " +
                         "Defaults to ./jobs");
         options.addOption("l", "logging-properties", true, 
@@ -141,11 +145,15 @@ public class Heritrix {
                 "web interface to bind to.");
         options.addOption("p", "web-port", true, "The port the web interface " +
                 "should listen on.");
-        options.addOption("r", "run-job", true, "Run a single job and then exit when it" +
-                "finishes.");
+        options.addOption("r", "run-job", true, "Run a single job and then exit " +
+                "when it finishes.");
         options.addOption("s", "ssl-params", true,  "Specify a keystore " +
                 "path, keystore password, and key password for HTTPS use. " +
                 "Separate with commas, no whitespace.");
+        options.addOption(null, "proxy-host", true, "Global http(s) proxy host " +
+                "to use for crawling.");
+        options.addOption(null, "proxy-port", true, "Global http(s) proxy port " +
+                "to use for crawling.");
         return options;
     }
     
@@ -261,6 +269,11 @@ public class Heritrix {
             System.exit(1);
             authPassword = ""; // suppresses uninitialized warning
         }
+
+        if (cl.hasOption('c') && !cl.hasOption('r')) {
+            System.err.println("Cannot use --checkpoint without --run-job.");
+            System.exit(1);
+        }
         
         File jobsDir = null; 
         if (cl.hasOption('j')) {
@@ -307,6 +320,15 @@ public class Heritrix {
             useAdhocKeystore(startupOut); 
         }
 
+        if(cl.hasOption("proxy-host")) {
+            String proxyHost = cl.getOptionValue("proxy-host");
+            String proxyPort = cl.getOptionValue("proxy-port", "8000");
+            System.setProperty("http.proxyHost", proxyHost);
+            System.setProperty("http.proxyPort", proxyPort);
+            System.setProperty("https.proxyHost", proxyHost);
+            System.setProperty("https.proxyPort", proxyPort);
+        }
+
         // Restlet will reconfigure logging according to the system property
         // so we must set it for -l to work properly
         System.setProperty("java.util.logging.config.file", properties.getPath());
@@ -315,7 +337,7 @@ public class Heritrix {
             LogManager.getLogManager().readConfiguration(finp);
             finp.close();
         }
-        
+
         // Set timezone here.  Would be problematic doing it if we're running
         // inside in a container.
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
@@ -361,12 +383,21 @@ public class Heritrix {
             }
             if (cl.hasOption('r')) {
                 String jobName = cl.getOptionValue('r');
-                engine.requestLaunch(jobName);
                 CrawlJob job = engine.getJob(jobName);
-                if (job == null || job.getCrawlController() == null) {
+                if (job == null) {
+                    System.err.println("Job not found: " + jobName);
+                    System.exit(1);
+                }
+                job.validateConfiguration();
+                if (cl.hasOption('c')) {
+                    job.getCheckpointService().setRecoveryCheckpointByName(cl.getOptionValue('c'));
+                }
+                job.launch();
+                if (job.getCrawlController() == null) {
                     System.err.println("Failed to launch job: " + jobName);
                     System.exit(1);
                 }
+
                 job.getCrawlController().requestCrawlResume();
                 engine.waitForNoRunningJobs(0);
                 engine.shutdown();
