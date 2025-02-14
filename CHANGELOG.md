@@ -1,5 +1,208 @@
 # Changelog
 
+## [Unreleased](https://github.com/internetarchive/heritrix3/tree/HEAD)
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.6.0...HEAD)
+
+## 3.7.0
+
+[Download distribution zip](https://repo1.maven.org/maven2/org/archive/heritrix/heritrix/3.7.0/heritrix-3.7.0-dist.zip) (or [tar.gz](https://repo1.maven.org/maven2/org/archive/heritrix/heritrix/3.7.0/heritrix-3.7.0-dist.tar.gz))
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.6.0...3.7.0) | [Javadoc](https://www.javadoc.io/doc/org.archive.heritrix/heritrix-engine/3.7.0/index.html) | [Maven Central](https://search.maven.org/artifact/org.archive.heritrix/heritrix/3.7.0/pom)
+
+#### New Features
+
+- **Groovy crawl configs** (experimental): Groovy Bean Definition DSL can now be used as an experimental alternative to
+  Spring XML. This enables more terse and human-readable job configuration with inline scripting capabilities. There is
+  no user interface for it in this release. For now, you must manually create a [crawler-beans.groovy](https://github.com/internetarchive/heritrix3/blob/4e8bda1/engine/src/main/resources/org/archive/crawler/restlet/profile-crawler-beans.groovy)
+  file in your job directory.
+  [#632](https://github.com/internetarchive/heritrix3/pull/632)
+
+- **ExtractorHTML obeyRelNofollow**: This option skips extraction of links marked `rel=nofollow`. This is useful for
+  avoiding crawler traps on some sites. [#638](https://github.com/internetarchive/heritrix3/pull/638)
+
+#### Fixes
+
+- **Cookie rejected warning**: The slf4j change in 3.6.0 inadvertently caused a previously hidden warning to be logged
+  to `job.log` when a server sends a `Set-Cookie` header with a disallowed domain value. This warning is now suppressed
+  since it occurs frequently and does not require any action from the crawl operator. [#640](https://github.com/internetarchive/heritrix3/pull/640)
+
+#### Changes
+
+- **Removed fastutil**: A small number of usages of fastutil were replaced with standard library equivalents in
+  webarchive-commons and Heritrix. This reduced the Heritrix distribution size from 51 MB to 34 MB. 
+  [iipc/webarchive-commons#101](https://github.com/iipc/webarchive-commons/pull/101)
+
+#### Dependency Upgrades
+
+- amqp-client 5.24.0
+- commons-codec 1.17.2
+- ftpserver-core 1.2.1
+- freemarker 2.3.34
+- jetty 9.4.57.v20241219
+- jsch 0.2.22
+- restlet 2.5.0
+- spring 6.1.16
+- webarchive-commons 1.3.0
+
+## 3.6.0
+
+[Download distribution zip](https://repo1.maven.org/maven2/org/archive/heritrix/heritrix/3.6.0/heritrix-3.6.0-dist.zip) (or [tar.gz](https://repo1.maven.org/maven2/org/archive/heritrix/heritrix/3.6.0/heritrix-3.6.0-dist.tar.gz))
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.5.0...3.6.0) | [Javadoc](https://www.javadoc.io/doc/org.archive.heritrix/heritrix-engine/3.6.0/index.html) | [Maven Central](https://search.maven.org/artifact/org.archive.heritrix/heritrix/3.6.0/pom)
+
+#### Java Compatibility Notice
+
+This release of Heritrix **requires Java 17 or later**.
+
+#### New Features
+- **Automatic Checkpoints on Shutdown**: Added `checkpointOnShutdown` option to `CheckpointService` to enable automatic checkpoints if Heritrix is gracefully terminated. [#626](https://github.com/internetarchive/heritrix3/pull/626)
+- **Command-Line Checkpoint Selection**: The `--checkpoint` command-line option restarts from a named checkpoint when using the `--run-job` option. [#626](https://github.com/internetarchive/heritrix3/pull/626)
+- **ConfigurableExtractorJS forceStrictIfUrlMatchingRegexList**: URLs matching the regular expressions on this list will be processed in strict mode, with only absolute URLs extracted, not  relative ones. [#624](https://github.com/internetarchive/heritrix3/pull/624)
+
+#### Changes
+- **Upgraded to Spring Framework 6.1**: The Spring `@Required` annotation has been removed, so it was replaced with a custom implementation to maintain backward compatibility with existing crawl configurations. Spring 6 requires Java 17 so Heritrix does now too. [#625](https://github.com/internetarchive/heritrix3/pull/625)
+
+#### Fixes
+- **Manifest Hop Priority**: Links from sitemaps are now given the same priority as normal navigation links. They were incorrectly being prioritized as transitive hops (embeds). [#623](https://github.com/internetarchive/heritrix3/pull/623)
+- **SLF4J Logging**: Heritrix now includes `slf4j-jdk14` to eliminate a startup warning message and fix logging for dependencies (such as crawler-commons) that use SLF4J. Heritrix doesn't use SLF4J itself. [#628](https://github.com/internetarchive/heritrix3/pull/628)
+
+#### Dependency Upgrades
+- amqp-client 5.23.0
+- commons-cli 1.9.0
+- commons-codec 1.17.1
+- commons-io 2.18.0
+- commons-net 3.11.1
+- crawler-commons 1.4
+- dnsjava 3.6.2
+- easymock 5.5.0
+- freemarker 2.3.33
+- groovy 4.0.24
+- gson 2.11.0
+- httpcomponents 4.5.14
+- java-socks-proxy-server 4.1.2
+- java-websocket removed
+- jaxb-runtime 4.0.5
+- jsch switched to mwiede fork 0.2.21
+- junit 4.13.2
+- kafka-clients 3.9.0
+- kryo 5.6.2
+- pdfbox 3.0.3
+- slf4j 2.0.16
+- spring-framework 6.1.15
+- webarchive-commons 1.2.0
+
+## [3.5.0](https://github.com/internetarchive/heritrix3/releases/3.5.0) 2024-10-29
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.4.0-20240909...3.5.0)
+
+#### Removals
+- Removed HBase modules from contrib. [#621](https://github.com/internetarchive/heritrix3/pull/621)
+
+#### Fixes
+- ConfigurableExtractorJS: Set default value (false) for strict property. [#612](https://github.com/internetarchive/heritrix3/pull/612)
+- ExtractorHTML: Treat `cite` attribute as a navlink instead of embed. [#608](https://github.com/internetarchive/heritrix3/pull/608)
+- Building no longer require the builds.archive.org repository. [#614](https://github.com/internetarchive/heritrix3/pull/614)
+- Updated to new URL of the restlet repository.
+
+#### Dependency Upgrades
+- Removed hbase, joda-time, log4j 
+- commons-io 2.14.0
+- kafka-clients 3.8.0
+- ftpserver-core 1.2.0
+- jetty 9.4.56.v20240826
+- webarchive-commons 1.1.10
+
+## [3.4.0-20240909](https://github.com/internetarchive/heritrix3/releases/3.4.0-20240909) 2024-09-09
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.4.0-20220727...3.4.0-20240909)
+
+#### Compatibility Note
+
+Checkpoints and crawl state created with older versions of Heritrix will not be loadable as kryo has been significantly updated. [Replaying the recovery log](https://heritrix.readthedocs.io/en/latest/operating.html#crawl-recovery) may be an alternative in some cases.
+
+#### New Features
+- JDK 22 support
+- Added `ConfigurableExtractorJS` for more flexible JavaScript extraction. ([#602](https://github.com/internetarchive/heritrix3/issues/602))
+- Added `HostnameQueueAssignmentPolicyWithLimits` with optional name length limits. ([#598](https://github.com/internetarchive/heritrix3/issues/598))
+- `ExtractorHTML` can now extract more variants of alternative resolution image URLs. ([#605](https://github.com/internetarchive/heritrix3/issues/605))
+- `ExtractorHTTP` can now be configured with extra inferred paths ([#597](https://github.com/internetarchive/heritrix3/issues/597))
+- `ExtractorYoutubeDL` metadata records can now be optionally logged to crawl.log ([#593](https://github.com/internetarchive/heritrix3/issues/593))
+
+#### Removals
+- Removed `ExtractorChrome` from contrib ([#601](https://github.com/internetarchive/heritrix3/issues/601))
+
+#### Fixes
+- Reduced false positive speculative URLs from meta tags ([#595](https://github.com/internetarchive/heritrix3/issues/595))
+- Fixed BdbModule resource leak on job teardown ([f4280012ae5f23763f1e19d196a245ae49f9b697](https://github.com/internetarchive/heritrix3/commit/f4280012ae5f23763f1e19d196a245ae49f9b697))
+- Corrected function name in `ScriptedProcessor` Javadoc. ([#599](https://github.com/internetarchive/heritrix3/issues/599))
+- Updated Maven builds to use HTTPS for resolving dependencies.
+- Reset CrawlURI status for hasPrerequisite() so that it isn't preserved between attempts ([#600](https://github.com/internetarchive/heritrix3/issues/600))
+- Fixed older junit3 tests not being run ([#592](https://github.com/internetarchive/heritrix3/issues/592))
+- Increased DiskSpaceMonitor default pause threshold to 8 GiB ([#499](https://github.com/internetarchive/heritrix3/issues/499))
+- Stopping logging authentication failures when header is missing ([#539](https://github.com/internetarchive/heritrix3/issues/539))
+- Fixed console still showing job running after crash ([#549](https://github.com/internetarchive/heritrix3/issues/549))
+
+#### Dependency Upgrades
+- Transitioned `PDFParser` and `ExtractorPDF` to pdfbox ([#575](https://github.com/internetarchive/heritrix3/issues/575))
+- Transitioned `ExtractorYoutubeDL` to yt-dlp
+- commons-net 3.9.0
+- com.rabbitmq:amqp-client 5.18.0
+- dnsjava 3.6.0
+- groovy 4.0.21
+- kryo 5.6.0
+- spring-expression 5.3.39
+
+## [3.4.0-20220727](https://github.com/internetarchive/heritrix3/tree/3.4.0-20220727) (2022-07-27)
+
+[Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.4.0-20210923...3.4.0-20220727)
+
+**Fixed bugs:**
+
+- ExtractorHTML matches srcset attribute case-sensitively [\#477](https://github.com/internetarchive/heritrix3/issues/477)
+- Overcrawling due to sitemap links acting like transclusions [\#469](https://github.com/internetarchive/heritrix3/issues/469)
+- "java.lang.NoClassDefFoundError: Could not initialize class org.archive.util.CLibrary" on Apple Silicon [\#467](https://github.com/internetarchive/heritrix3/issues/467)
+- Heritrix crasching on malformed Content-Length header [\#449](https://github.com/internetarchive/heritrix3/issues/449)
+- Java version check throws StringIndexOutOfBoundsException on exact major versions [\#439](https://github.com/internetarchive/heritrix3/issues/439)
+- dnsjava NIO selector thread stuck at 100% after terminating job [\#425](https://github.com/internetarchive/heritrix3/issues/425)
+- Do not treat all URLs from link/@href tags as embeds. [\#263](https://github.com/internetarchive/heritrix3/issues/263)
+- BdbCookieStore  not implemented  iterator at RetryExec  [\#200](https://github.com/internetarchive/heritrix3/issues/200)
+- "RIS already open for ToeThread..." exception during https pages crawl over proxy [\#191](https://github.com/internetarchive/heritrix3/issues/191)
+
+**Closed issues:**
+
+- Heritrix not ignoring robots.txt [\#479](https://github.com/internetarchive/heritrix3/issues/479)
+- JDK18: ExtractorMultipleRegexTest fails due to Groovy asm incompatiblity [\#473](https://github.com/internetarchive/heritrix3/issues/473)
+- Setting of maxLogFileSize in the BDBModule is ineffective [\#464](https://github.com/internetarchive/heritrix3/issues/464)
+- Question about memory usage [\#462](https://github.com/internetarchive/heritrix3/issues/462)
+- Build failing via maven-assembly-plugin: group id is too big [\#447](https://github.com/internetarchive/heritrix3/issues/447)
+- Do not require DNS when using a web proxy [\#211](https://github.com/internetarchive/heritrix3/issues/211)
+
+**Merged pull requests:**
+
+- Bump jsch from 0.1.52 to 0.1.54 in /commons [\#492](https://github.com/internetarchive/heritrix3/pull/492) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump spring-core from 5.3.19 to 5.3.20 in /commons [\#491](https://github.com/internetarchive/heritrix3/pull/491) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump jsch from 0.1.52 to 0.1.54 in /modules [\#490](https://github.com/internetarchive/heritrix3/pull/490) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add robotsTxtOnly robots policy [\#489](https://github.com/internetarchive/heritrix3/pull/489) ([ato](https://github.com/ato))
+- Removed a potential NPE in hashCode method to CrawlURI which was fata… [\#488](https://github.com/internetarchive/heritrix3/pull/488) ([csrster](https://github.com/csrster))
+- Bump gson from 2.8.6 to 2.8.9 in /contrib [\#486](https://github.com/internetarchive/heritrix3/pull/486) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump spring-core from 5.3.18 to 5.3.19 in /commons [\#480](https://github.com/internetarchive/heritrix3/pull/480) ([dependabot[bot]](https://github.com/apps/dependabot))
+- ExtractorHTML: Fix srcset by normalizing elementContext\(\) to lowercase [\#478](https://github.com/internetarchive/heritrix3/pull/478) ([ato](https://github.com/ato))
+- Issue211: support dns over https if local DNS is not working / available [\#476](https://github.com/internetarchive/heritrix3/pull/476) ([ClemensRobbenhaar](https://github.com/ClemensRobbenhaar))
+- Bump spring-beans from 5.3.14 to 5.3.18 in /commons [\#475](https://github.com/internetarchive/heritrix3/pull/475) ([dependabot[bot]](https://github.com/apps/dependabot))
+- TransclusionDecideRule: Don't treat sitemap links \('M'\) as transclusions [\#470](https://github.com/internetarchive/heritrix3/pull/470) ([ato](https://github.com/ato))
+- Use Files.createLink\(\) and Files.createSymbolicLink\(\) instead of JNA [\#468](https://github.com/internetarchive/heritrix3/pull/468) ([ato](https://github.com/ato))
+- Fix name of parameter in setMaxLogFileSize [\#465](https://github.com/internetarchive/heritrix3/pull/465) ([ClemensRobbenhaar](https://github.com/ClemensRobbenhaar))
+- Add conf to not allow TLDs as seeds found via redirect from other seeds [\#461](https://github.com/internetarchive/heritrix3/pull/461) ([kris-sigur](https://github.com/kris-sigur))
+- Bump spring-core from 5.3.3 to 5.3.14 in /commons [\#460](https://github.com/internetarchive/heritrix3/pull/460) ([dependabot[bot]](https://github.com/apps/dependabot))
+- ExtractorHTML: Determine LINK tag type by parsing REL attribute [\#459](https://github.com/internetarchive/heritrix3/pull/459) ([ato](https://github.com/ato))
+- Fix issue\#191: "RIS already open for ToeThread..." exception during https pages crawl over proxy [\#457](https://github.com/internetarchive/heritrix3/pull/457) ([ClemensRobbenhaar](https://github.com/ClemensRobbenhaar))
+- FetchHTTP: Handle null characters in the Content-Length header [\#452](https://github.com/internetarchive/heritrix3/pull/452) ([ato](https://github.com/ato))
+- Add Dockerfile [\#450](https://github.com/internetarchive/heritrix3/pull/450) ([Querela](https://github.com/Querela))
+- Resolve gid too big [\#448](https://github.com/internetarchive/heritrix3/pull/448) ([ldko](https://github.com/ldko))
+- FetchDNS: Keep dnsjava selector thread out of ToePool [\#444](https://github.com/internetarchive/heritrix3/pull/444) ([ato](https://github.com/ato))
+- Enabled configurable url-matching and extraction for sitemaps. [\#441](https://github.com/internetarchive/heritrix3/pull/441) ([csrster](https://github.com/csrster))
+
 ## [3.4.0-20210923](https://github.com/internetarchive/heritrix3/tree/3.4.0-20210923) (2021-09-23)
 
 [Full Changelog](https://github.com/internetarchive/heritrix3/compare/3.4.0-20210803...3.4.0-20210923)
@@ -91,7 +294,7 @@
 **Fixed bugs:**
 
 - Upgrade dnsjava to cope with Azure CNAME lists [\#344](https://github.com/internetarchive/heritrix3/issues/344)
-- Spring instanciation broken for MatchesListRegexDecideRule [\#337](https://github.com/internetarchive/heritrix3/issues/337)
+- Spring instantiation broken for MatchesListRegexDecideRule [\#337](https://github.com/internetarchive/heritrix3/issues/337)
 
 **Closed issues:**
 
@@ -108,7 +311,7 @@
 
 - Update changelog. [\#390](https://github.com/internetarchive/heritrix3/pull/390) ([anjackson](https://github.com/anjackson))
 - Update dependencies 2021 05 26 [\#389](https://github.com/internetarchive/heritrix3/pull/389) ([anjackson](https://github.com/anjackson))
-- Bring changlog up to date [\#386](https://github.com/internetarchive/heritrix3/pull/386) ([anjackson](https://github.com/anjackson))
+- Bring changelog up to date [\#386](https://github.com/internetarchive/heritrix3/pull/386) ([anjackson](https://github.com/anjackson))
 - Allow tuning of BDB-JE evictor and cleaner threads. [\#384](https://github.com/internetarchive/heritrix3/pull/384) ([anjackson](https://github.com/anjackson))
 - Update to latest version of dnsjava, for \#344 [\#383](https://github.com/internetarchive/heritrix3/pull/383) ([anjackson](https://github.com/anjackson))
 - Avoid error when bean properties have no url available [\#379](https://github.com/internetarchive/heritrix3/pull/379) ([ldko](https://github.com/ldko))
@@ -316,7 +519,7 @@
 - various changes to amqp publish and receive [\#150](https://github.com/internetarchive/heritrix3/pull/150) ([nlevitt](https://github.com/nlevitt))
 - Update to ExtractorHTML.java for cond. comments [\#149](https://github.com/internetarchive/heritrix3/pull/149) ([eleclerc](https://github.com/eleclerc))
 - Don't canonicalize source tag so that SourceSeedDecideRule will work.… [\#148](https://github.com/internetarchive/heritrix3/pull/148) ([vonrosen](https://github.com/vonrosen))
-- More fixes for mutlipart form submission [\#146](https://github.com/internetarchive/heritrix3/pull/146) ([vonrosen](https://github.com/vonrosen))
+- More fixes for multipart form submission [\#146](https://github.com/internetarchive/heritrix3/pull/146) ([vonrosen](https://github.com/vonrosen))
 - Make some urls with whitespace acceptable to JavaScript extractor. [\#145](https://github.com/internetarchive/heritrix3/pull/145) ([vonrosen](https://github.com/vonrosen))
 - run received urls through the candidates processor, to check scope an… [\#144](https://github.com/internetarchive/heritrix3/pull/144) ([nlevitt](https://github.com/nlevitt))
 - handle login forms with \<input type="text"\> fields in addition to use… [\#143](https://github.com/internetarchive/heritrix3/pull/143) ([nlevitt](https://github.com/nlevitt))

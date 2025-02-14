@@ -245,6 +245,7 @@ http://example.example/example
   <!-- <property name="acceptNonDnsResolves" value="false" /> -->
   <!-- <property name="digestContent" value="true" /> -->
   <!-- <property name="digestAlgorithm" value="sha1" /> -->
+  <!-- <property name="dnsOverHttpServer" value="https://dns.google/dns-query" /> -->
  </bean>
  <!-- <bean id="fetchWhois" class="org.archive.modules.fetcher.FetchWhois">
        <property name="specialQueryTemplates">
@@ -305,6 +306,7 @@ http://example.example/example
   <!-- <property name="maxElementLength" value="1024" /> -->
   <!-- <property name="maxAttributeNameLength" value="1024" /> -->
   <!-- <property name="maxAttributeValueLength" value="16384" /> -->
+  <!-- <property name="obeyRelNofollow" value="false" /> -->
  </bean>
  <bean id="extractorCss" class="org.archive.modules.extractor.ExtractorCSS">
  </bean> 
@@ -563,6 +565,7 @@ http://example.example/example
  <bean id="checkpointService" 
    class="org.archive.crawler.framework.CheckpointService">
   <!-- <property name="checkpointIntervalMinutes" value="-1"/> -->
+  <!-- <property name="checkpointOnShutdown" value="true"/> -->
   <!-- <property name="checkpointsDir" value="checkpoints"/> -->
   <!-- <property name="forgetAllButLatest" value="true"/> -->
  </bean>
@@ -623,10 +626,13 @@ http://example.example/example
  -->
  
  <!-- DISK SPACE MONITOR: 
-      Pauses the crawl if disk space at monitored paths falls below minimum threshold -->
+      Pauses the crawl if disk space at monitored paths falls below minimum threshold
+      Note: If there's less than 5 GiB free for state directory BDB will throw
+      an error which the crawl job will likely not be to fully recover from.
+      -->
  <!-- 
  <bean id="diskSpaceMonitor" class="org.archive.crawler.monitor.DiskSpaceMonitor">
-   <property name="pauseThresholdMiB" value="500" />
+   <property name="pauseThresholdMiB" value="8192" />
    <property name="monitorConfigPaths" value="true" />
    <property name="monitorPaths">
      <list>

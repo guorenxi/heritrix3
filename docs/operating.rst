@@ -27,6 +27,9 @@ Command-line Options
 -b, --web-bind-hosts HOST
             Specifies a comma-separated list of hostnames/IP-addresses to bind to the Web UI. You may use '/' as a
             shorthand for 'all addresses'.  **Default**: ``localhost/127.0.0.1``
+ -c,--checkpoint ARG
+            Recovers from the given checkpoint. May only be used with the --run-job option. The special value 'latest'
+            will recover the last checkpoint or if none exist will launch a new crawl.
 -j, --job-dirs PATH
             Sets the directory Heritrix stores jobs in. **Default:** ``$HERITRIX_HOME/jobs``
 -l, --logging-properties PATH
@@ -198,8 +201,7 @@ Log Files
 Each crawl job has its own set of log files found in the ``logs`` subdirectory of a job launch directory.
 
 Logging can be configured by modifying the ``logging.properties`` file
-that is located under the ``$HERITRIX_HOME/conf`` directory. For information on using
-logging properties, visit http://logging.apache.org/log4j/.
+that is located under the ``$HERITRIX_HOME/conf`` directory.
 
 alerts.log
 ~~~~~~~~~~
@@ -652,6 +654,73 @@ Note that the recovery journal format's 'F+' lines may include a
 'hops-path' and 'via URI', which are preserved when a URI is enqueued
 via the above mechanisms, but that this may not be a complete
 representation of all URI state from its discovery in a normal crawl.
+
+Checkpointing
+-------------
+
+Checkpointing a crawl job writes a representation of the current state of the job under the ``checkpoints`` directory
+which can be used to restart the job from the same point.
+
+Checkpointed state includes serialization of the main crawl job objects, copies of the current set of bdbje log files,
+and other files that represent the state of the crawl.  The checkpoint directory contains all that is required to
+recover a crawl.  Checkpointing also rotates the crawl logs, including the recover.gz log, if enabled.  Log files are
+NOT copied to the checkpoint directory.  They are left under the logs directory and are distinguished by a suffix.  The
+suffix is the checkpoint name.  For example, for checkpoint cp00001-20220930061713 the crawl log would be named
+crawl.log.cp00001-20220930061713.
+
+To make checkpointing faster and reduce disk space usage, hardlinks on systems that support them to collect the
+BerkeleyDB-JE files required to reproduce the crawler's state.
+
+To run a checkpoint, click the checkpoint button on the job page of the WUI or invoke the checkpoint functionality
+through the REST API. While checkpointing, the crawl status will show as CHECKPOINTING.  When the checkpoint has
+completed, the crawler will resume crawling, unless it was in the paused state when the checkpoint was invoked.
+In this case, the crawler will re-enter the paused state.
+
+Recovery from a checkpoint has much in common with the recovery of a crawl using the frontier.recovery.log.
+
+Automated Checkpointing
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To configure Heritrix to automatically run checkpoints periodically, set the
+``checkpointService.checkpointIntervalMinutes`` property:
+
+.. code-block:: xml
+
+  <bean id="checkpointService" class="org.archive.crawler.framework.CheckpointService">
+    <property name="checkpointIntervalMinutes" value="60"/>
+    <property name="checkpointOnShutdown" value="true"/>
+    <!-- <property name="checkpointsDir" value="checkpoints"/> -->
+    <property name="forgetAllButLatest" value="true"/>
+  </bean>
+
+When ``checkpointOnShutdown`` is enabled Heritrix will create a checkpoint if the job is running when the JVM is
+gracefully shutdown. Note that if Heritrix is killed, crashes or the server it is running on unexpectedly loses
+power the shutdown checkpoint will not be created. Consequently it may be ideal to enable both shutdown and interval
+checkpoints together.
+
+Setting ``forgetAllButLatest``` will ensure only the latest checkpoint is kept.
+
+
+Restarting from a Checkpoint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The web UI provides an option to restart a crawl from a checkpoint:
+
+1. Checkpoint the running crawl by clicking the "checkpoint" button.
+2. When the checkpoint ends (a message will be displayed informing the operator of this event) terminate the crawl by
+   clicking the "terminate" button.
+3. Teardown the job by clicking the "teardown" button.
+4. Re-build the job by clicking the "build" button.  At this point a dropdown box should appear under the command
+   buttons.  The dropdown box has the names of the previously invoked checkpoints.
+5. Select a checkpoint from the dropdown.  The selected checkpoint will be used to start the newly built job.
+6. Click launch
+7. Click unpause
+
+The job will now begin running from the chosen checkpoint.
+
+When running a job from the command-line with the ``--run-job`` CLI option you can use the ``--checkpoint`` to restart
+the job from a named checkpoint. The special name ``latest`` will restart from the latest checkpoint if any exist,
+otherwise it will launch a new crawl.
 
 Crawl Recovery
 --------------
